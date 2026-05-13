@@ -89,23 +89,30 @@ const Home = () => {
           whiteSpace: 'nowrap',
           boxShadow: '0 4px 20px rgba(212, 255, 0, 0.3)'
         }}>
-          <div className="marquee" style={{ display: 'inline-block', paddingLeft: '100%' }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '20px' }}>
-              <Bell size={18} fill="#000" />
-              {announcement}
-              <Bell size={18} fill="#000" style={{ marginLeft: '40px' }} />
-              {announcement}
-              <Bell size={18} fill="#000" style={{ marginLeft: '40px' }} />
-              {announcement}
-            </span>
+          <div className="marquee-content" style={{ display: 'flex', width: 'max-content' }}>
+            <div className="marquee-track" style={{ display: 'flex', alignItems: 'center', gap: '50px', paddingRight: '50px' }}>
+              <Bell size={18} fill="#000" /> {announcement}
+              <Bell size={18} fill="#000" /> {announcement}
+              <Bell size={18} fill="#000" /> {announcement}
+              <Bell size={18} fill="#000" /> {announcement}
+            </div>
+            <div className="marquee-track" style={{ display: 'flex', alignItems: 'center', gap: '50px', paddingRight: '50px' }}>
+              <Bell size={18} fill="#000" /> {announcement}
+              <Bell size={18} fill="#000" /> {announcement}
+              <Bell size={18} fill="#000" /> {announcement}
+              <Bell size={18} fill="#000" /> {announcement}
+            </div>
           </div>
           <style>{`
-            .marquee {
-              animation: marquee 20s linear infinite;
+            .marquee-content {
+              animation: marquee-scroll 30s linear infinite;
             }
-            @keyframes marquee {
-              0% { transform: translate(0, 0); }
-              100% { transform: translate(-100%, 0); }
+            .marquee-track {
+              flex-shrink: 0;
+            }
+            @keyframes marquee-scroll {
+              0% { transform: translateX(0); }
+              100% { transform: translateX(-50%); }
             }
           `}</style>
         </div>
