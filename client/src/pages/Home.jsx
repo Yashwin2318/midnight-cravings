@@ -1,15 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { db } from '../firebase';
-import { collection, query, where, getDocs, doc, onSnapshot } from 'firebase/firestore';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
 import SnackCard from '../components/SnackCard';
-import { 
-  AlertTriangle,
-  Search,
-  SlidersHorizontal,
-  Bell
-} from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 
 const CATEGORY_DATA = [
   { id: 'All', name: 'All items', icon: '🛒' },
@@ -26,19 +21,8 @@ const Home = () => {
   const [filteredListings, setFilteredListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState('All');
-  const [announcement, setAnnouncement] = useState(null);
-  const { currentUser } = useAuth();
 
   useEffect(() => {
-    // Real-time listener for announcements
-    const unsubAnnouncement = onSnapshot(doc(db, "settings", "global"), (doc) => {
-      if (doc.exists() && doc.data().isAnnouncementActive) {
-        setAnnouncement(doc.data().announcementText);
-      } else {
-        setAnnouncement(null);
-      }
-    });
-
     const fetchListings = async () => {
       try {
         const q = query(collection(db, "listings"), where("quantity", ">", 0));
@@ -56,7 +40,6 @@ const Home = () => {
     };
 
     fetchListings();
-    return () => unsubAnnouncement();
   }, []);
 
   useEffect(() => {
@@ -72,59 +55,6 @@ const Home = () => {
   return (
     <div className="animate-fade-in" style={{ paddingBottom: '100px' }}>
       
-      {/* Global Marquee Alert */}
-      {announcement && (
-        <div style={{ 
-          background: 'var(--accent-primary)', 
-          color: '#000', 
-          padding: '12px 0', 
-          position: 'fixed', 
-          top: 0, 
-          left: 0, 
-          right: 0, 
-          zIndex: 1000,
-          fontWeight: '900',
-          fontSize: '0.9rem',
-          overflow: 'hidden',
-          whiteSpace: 'nowrap',
-          boxShadow: '0 4px 20px rgba(212, 255, 0, 0.3)'
-        }}>
-          <div className="marquee-content" style={{ display: 'flex', width: 'max-content' }}>
-            <div className="marquee-track" style={{ display: 'flex', alignItems: 'center', gap: '50px', paddingRight: '50px' }}>
-              <Bell size={18} fill="#000" /> {announcement}
-              <Bell size={18} fill="#000" /> {announcement}
-              <Bell size={18} fill="#000" /> {announcement}
-              <Bell size={18} fill="#000" /> {announcement}
-              <Bell size={18} fill="#000" /> {announcement}
-              <Bell size={18} fill="#000" /> {announcement}
-            </div>
-            <div className="marquee-track" style={{ display: 'flex', alignItems: 'center', gap: '50px', paddingRight: '50px' }}>
-              <Bell size={18} fill="#000" /> {announcement}
-              <Bell size={18} fill="#000" /> {announcement}
-              <Bell size={18} fill="#000" /> {announcement}
-              <Bell size={18} fill="#000" /> {announcement}
-              <Bell size={18} fill="#000" /> {announcement}
-              <Bell size={18} fill="#000" /> {announcement}
-            </div>
-          </div>
-          <style>{`
-            .marquee-content {
-              animation: marquee-scroll 15s linear infinite;
-            }
-            .marquee-track {
-              flex-shrink: 0;
-            }
-            @keyframes marquee-scroll {
-              0% { transform: translateX(0); }
-              100% { transform: translateX(-50%); }
-            }
-          `}</style>
-        </div>
-      )}
-
-      {/* Spacing for Marquee */}
-      {announcement && <div style={{ height: '50px' }}></div>}
-
       {/* Hero Section */}
       <div style={{ marginTop: '80px', marginBottom: '100px' }}>
         <div style={{ 
