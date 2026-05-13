@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { db } from '../firebase';
 import { doc, getDoc, collection, addDoc, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
-import { MessageSquare, MapPin, ArrowLeft, Send } from 'lucide-react';
+import { MessageSquare, MapPin, ArrowLeft, Send, CheckCircle2, User as UserIcon } from 'lucide-react';
 
 const OrderDetails = () => {
   const { orderId } = useParams();
@@ -20,7 +20,6 @@ const OrderDetails = () => {
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
         const data = docSnap.data();
-        // Security check
         if (data.buyerId !== currentUser.uid && data.sellerId !== currentUser.uid) {
           navigate('/');
           return;
@@ -32,7 +31,6 @@ const OrderDetails = () => {
 
     fetchOrder();
 
-    // Listen for messages
     const q = query(
       collection(db, "orders", orderId, "messages"),
       orderBy("timestamp", "asc")
@@ -61,93 +59,130 @@ const OrderDetails = () => {
     }
   };
 
-  if (loading) return <div style={{ textAlign: 'center', marginTop: '50px' }}>Loading pickup details...</div>;
-  if (!order) return <div style={{ textAlign: 'center', marginTop: '50px' }}>Order not found.</div>;
+  if (loading) return <div style={{ textAlign: 'center', marginTop: '100px', color: 'var(--accent-primary)', fontSize: '1.2rem', fontWeight: '800' }}>FETCHING SECURE LINE...</div>;
+  if (!order) return <div style={{ textAlign: 'center', marginTop: '100px' }}>Order not found.</div>;
 
   const isSeller = currentUser.uid === order.sellerId;
 
   return (
-    <div className="animate-fade-in" style={{ maxWidth: '800px', margin: '20px auto' }}>
+    <div className="animate-fade-in" style={{ maxWidth: '1000px', margin: '40px auto' }}>
       <button 
         onClick={() => navigate('/dashboard')} 
-        style={{ background: 'transparent', color: 'var(--text-secondary)', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '5px' }}
+        style={{ background: 'transparent', color: 'var(--text-secondary)', marginBottom: '30px', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.9rem', fontWeight: '700' }}
       >
-        <ArrowLeft size={18} /> Back to Dashboard
+        <ArrowLeft size={18} /> BACK TO DASHBOARD
       </button>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '30px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '350px 1fr', gap: '30px', height: '700px' }}>
         
-        {/* Order Info */}
+        {/* Order Info Sidebar */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <div className="glass" style={{ padding: '25px' }}>
-            <h3 style={{ color: 'var(--accent-primary)', marginBottom: '15px' }}>Order Details</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '0.9rem' }}>
-              <p><strong>Snack:</strong> {order.listingName}</p>
-              <p><strong>Quantity:</strong> {order.quantity}</p>
-              <p><strong>Total:</strong> ${order.price.toFixed(2)}</p>
-              <p><strong>Status:</strong> <span style={{ color: 'var(--accent-secondary)' }}>{order.status.toUpperCase()}</span></p>
+          <div className="card" style={{ padding: '30px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', color: 'var(--accent-primary)' }}>
+              <CheckCircle2 size={24} />
+              <h3 style={{ fontWeight: '900', fontSize: '1.2rem' }}>ORDER SECURED</h3>
+            </div>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+              <div>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.7rem', fontWeight: '800', textTransform: 'uppercase' }}>Product</p>
+                <p style={{ fontSize: '1.1rem', fontWeight: '700' }}>{order.listingName}</p>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <div>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.7rem', fontWeight: '800', textTransform: 'uppercase' }}>Quantity</p>
+                  <p style={{ fontWeight: '700' }}>x{order.quantity}</p>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.7rem', fontWeight: '800', textTransform: 'uppercase' }}>Amount</p>
+                  <p style={{ fontWeight: '900', color: 'var(--accent-primary)' }}>₹{order.price}</p>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="glass" style={{ padding: '25px' }}>
-            <h3 style={{ marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <MapPin size={20} className="text-accent-secondary" />
-              Pickup Info
+          <div className="card" style={{ padding: '30px', flex: 1 }}>
+            <h3 style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.1rem', fontWeight: '900' }}>
+              <MapPin size={20} style={{ color: 'var(--accent-primary)' }} />
+              LOGISTICS
             </h3>
-            <div style={{ fontSize: '0.9rem', lineHeight: '1.6' }}>
-              <p><strong>Buyer Room:</strong> {order.buyerRoom}</p>
-              <p><strong>Seller:</strong> {order.sellerName}</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.7rem', fontWeight: '800', textTransform: 'uppercase' }}>Buyer USN</p>
+                <p style={{ fontWeight: '700' }}>{order.buyerUSN || 'Unknown'}</p>
+              </div>
+              <div>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.7rem', fontWeight: '800', textTransform: 'uppercase' }}>Counterparty</p>
+                <p style={{ fontWeight: '700' }}>{isSeller ? order.buyerName : order.sellerName}</p>
+              </div>
               {order.note && (
-                <div style={{ marginTop: '10px', padding: '10px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', fontStyle: 'italic' }}>
-                  " {order.note} "
+                <div>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.7rem', fontWeight: '800', textTransform: 'uppercase', marginBottom: '8px' }}>Delivery Note</p>
+                  <div style={{ padding: '15px', background: '#000', border: '1px solid var(--border-color)', borderRadius: '12px', fontSize: '0.9rem', fontStyle: 'italic' }}>
+                    "{order.note}"
+                  </div>
                 </div>
               )}
             </div>
           </div>
         </div>
 
-        {/* Chat Thread */}
-        <div className="glass" style={{ display: 'flex', flexDirection: 'column', height: '500px', overflow: 'hidden' }}>
-          <div style={{ padding: '20px', borderBottom: '1px solid var(--surface-border)', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <MessageSquare size={20} />
-            <h3>Chat with {isSeller ? 'Buyer' : 'Seller'}</h3>
+        {/* Chat Terminal */}
+        <div className="card" style={{ display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden' }}>
+          <div style={{ padding: '25px 30px', borderBottom: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.02)', display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'var(--accent-primary)', boxShadow: '0 0 10px var(--accent-primary)' }}></div>
+            <h3 style={{ fontWeight: '900', fontSize: '1.1rem' }}>ENCRYPTED CHAT</h3>
           </div>
 
-          <div style={{ flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '30px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
             {messages.length === 0 && (
-              <p style={{ textAlign: 'center', color: 'var(--text-secondary)', marginTop: '50px', fontSize: '0.9rem' }}>
-                Start a conversation to agree on the pickup time.
-              </p>
+              <div style={{ textAlign: 'center', color: 'var(--text-secondary)', marginTop: '100px' }}>
+                <MessageSquare size={48} style={{ opacity: 0.1, marginBottom: '20px' }} />
+                <p style={{ fontSize: '0.9rem' }}>Initialize coordination with the {isSeller ? 'buyer' : 'seller'}.</p>
+              </div>
             )}
             {messages.map((msg) => (
               <div 
                 key={msg.id} 
                 style={{ 
                   alignSelf: msg.senderId === currentUser.uid ? 'flex-end' : 'flex-start',
-                  maxWidth: '80%',
-                  padding: '10px 15px',
-                  borderRadius: '12px',
-                  background: msg.senderId === currentUser.uid ? 'var(--accent-primary)' : 'rgba(255,255,255,0.1)',
-                  fontSize: '0.9rem'
+                  maxWidth: '70%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: msg.senderId === currentUser.uid ? 'flex-end' : 'flex-start'
                 }}
               >
-                <p>{msg.text}</p>
-                <span style={{ fontSize: '0.7rem', opacity: 0.6, display: 'block', marginTop: '4px' }}>
+                <div 
+                  style={{ 
+                    padding: '12px 20px',
+                    borderRadius: '16px',
+                    borderTopRightRadius: msg.senderId === currentUser.uid ? '4px' : '16px',
+                    borderTopLeftRadius: msg.senderId === currentUser.uid ? '16px' : '4px',
+                    background: msg.senderId === currentUser.uid ? 'var(--accent-primary)' : 'var(--surface-hover)',
+                    color: msg.senderId === currentUser.uid ? '#000' : '#fff',
+                    fontWeight: '600',
+                    fontSize: '0.95rem'
+                  }}
+                >
+                  {msg.text}
+                </div>
+                <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', marginTop: '6px', fontWeight: '800' }}>
                   {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </span>
               </div>
             ))}
           </div>
 
-          <form onSubmit={handleSendMessage} style={{ padding: '20px', borderTop: '1px solid var(--surface-border)', display: 'flex', gap: '10px' }}>
+          <form onSubmit={handleSendMessage} style={{ padding: '30px', background: '#050505', borderTop: '1px solid var(--border-color)', display: 'flex', gap: '15px' }}>
             <input 
               type="text" 
               className="input-field" 
-              placeholder="Type a message..." 
+              placeholder="Transmit message..." 
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
+              style={{ background: '#000' }}
             />
-            <button type="submit" className="btn-primary" style={{ padding: '10px' }}>
+            <button type="submit" className="btn-primary" style={{ padding: '0 25px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Send size={20} />
             </button>
           </form>

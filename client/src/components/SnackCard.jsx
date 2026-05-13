@@ -3,14 +3,15 @@ import { useAuth } from '../context/AuthContext';
 import { db } from '../firebase';
 import { collection, addDoc, doc, updateDoc, increment } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
-import { ShoppingCart, User as UserIcon, Tag } from 'lucide-react';
+import { ShoppingCart, User as UserIcon, Tag, IndianRupee, Loader2, Plus, Minus } from 'lucide-react';
+import logo from '../assets/logo.png'; // Make sure to save the image as logo.png in assets
 
 const SnackCard = ({ listing }) => {
   const { currentUser, userData } = useAuth();
   const [showBuyModal, setShowBuyModal] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [note, setNote] = useState('');
-  const [buying, setBuying] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const navigate = useNavigate();
 
   const isSeller = currentUser?.uid === listing.sellerId;
@@ -22,25 +23,25 @@ const SnackCard = ({ listing }) => {
     }
 
     try {
-      setBuying(true);
+      setIsProcessing(true);
       const orderData = {
         listingId: listing.id,
         listingName: listing.name,
         buyerId: currentUser.uid,
         buyerName: userData?.name || 'Unknown',
-        buyerRoom: userData?.roomNumber || 'Unknown',
+        buyerUSN: userData?.usn || 'Unknown',
         sellerId: listing.sellerId,
         sellerName: listing.sellerName,
         quantity: quantity,
         price: listing.price * quantity,
         note: note,
         status: 'pending',
+        category: listing.category || 'Others',
         createdAt: new Date().toISOString()
       };
 
       const orderRef = await addDoc(collection(db, "orders"), orderData);
       
-      // Update listing quantity
       await updateDoc(doc(db, "listings", listing.id), {
         quantity: increment(-quantity)
       });
@@ -49,117 +50,197 @@ const SnackCard = ({ listing }) => {
     } catch (err) {
       console.error("Error placing order:", err);
       alert("Failed to place order.");
+      setIsProcessing(false);
     }
-    setBuying(false);
+  };
+
+  const adjustQuantity = (amount) => {
+    setQuantity(prev => {
+      const newVal = prev + amount;
+      if (newVal < 1) return 1;
+      if (newVal > listing.quantity) return listing.quantity;
+      return newVal;
+    });
   };
 
   return (
-    <div className="glass glass-card" style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-      <div style={{ height: '180px', background: 'rgba(255,255,255,0.05)', position: 'relative' }}>
-        {listing.photoUrl ? (
-          <img 
-            src={listing.photoUrl} 
-            alt={listing.name} 
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-          />
-        ) : (
-          <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Tag size={40} style={{ opacity: 0.3 }} />
-          </div>
-        )}
+    <div className="card" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+      {/* Image Area */}
+      <div style={{ height: '240px', background: '#050505', position: 'relative' }}>
+        <img 
+          src={listing.photoUrl?.trim() ? listing.photoUrl : logo} 
+          alt={listing.name} 
+          style={{ 
+            width: '100%', 
+            height: '100%', 
+            objectFit: listing.photoUrl?.trim() ? 'cover' : 'contain', 
+            opacity: listing.photoUrl?.trim() ? 0.8 : 1,
+            padding: listing.photoUrl?.trim() ? 0 : '40px',
+            mixBlendMode: listing.photoUrl?.trim() ? 'normal' : 'screen'
+          }} 
+        />
         <div style={{ 
           position: 'absolute', 
-          top: '10px', 
-          right: '10px', 
-          background: 'var(--accent-primary)', 
-          padding: '4px 10px', 
-          borderRadius: '20px', 
-          fontWeight: 'bold',
-          fontSize: '0.9rem'
+          top: '15px', 
+          left: '15px',
         }}>
-          ${listing.price}
+          <span className="badge badge-yellow">{listing.category || 'SNACK'}</span>
         </div>
       </div>
 
-      <div style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <h3 style={{ marginBottom: '5px' }}>{listing.name}</h3>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '15px', flex: 1 }}>
+      {/* Content Area */}
+      <div style={{ padding: '25px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '15px' }}>
+          <h3 style={{ fontSize: '1.4rem', fontWeight: '900', textTransform: 'uppercase' }}>{listing.name}</h3>
+          <div style={{ display: 'flex', alignItems: 'center', color: 'var(--accent-primary)' }}>
+            <IndianRupee size={20} strokeWidth={3} />
+            <span style={{ fontSize: '1.6rem', fontWeight: '900' }}>{listing.price}</span>
+          </div>
+        </div>
+        
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', marginBottom: '25px', lineHeight: '1.6', flex: 1 }}>
           {listing.description}
         </p>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--text-secondary)', fontSize: '0.8rem', marginBottom: '15px' }}>
-          <UserIcon size={14} />
-          <span>Seller: {listing.sellerName}</span>
-          <span style={{ margin: '0 5px' }}>•</span>
-          <span>Qty: {listing.quantity}</span>
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          padding: '15px 0',
+          borderTop: '1px solid var(--border-color)',
+          fontSize: '0.85rem',
+          color: 'var(--text-secondary)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', color: 'white' }}>
+              {listing.sellerName?.charAt(0)}
+            </div>
+            <span>{listing.sellerName}</span>
+          </div>
+          <div style={{ fontWeight: '800', color: 'var(--accent-primary)', fontSize: '0.9rem' }}>
+            {listing.quantity} IN STOCK
+          </div>
         </div>
 
         {isSeller ? (
-          <div style={{ color: 'var(--accent-primary)', fontSize: '0.9rem', textAlign: 'center', padding: '10px', border: '1px dashed var(--accent-primary)', borderRadius: '8px' }}>
-            Your Listing
-          </div>
+          <button disabled style={{ width: '100%', background: '#111', color: '#444', marginTop: '15px' }}>MY LISTING</button>
         ) : (
           <button 
             className="btn-primary" 
-            style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+            style={{ width: '100%', marginTop: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
             onClick={() => setShowBuyModal(true)}
           >
             <ShoppingCart size={18} />
-            Buy Now
+            SECURE NOW
           </button>
         )}
       </div>
 
+      {/* Buy Modal */}
       {showBuyModal && (
         <div style={{ 
           position: 'fixed', 
           top: 0, left: 0, right: 0, bottom: 0, 
-          background: 'rgba(0,0,0,0.8)', 
+          background: 'rgba(0,0,0,0.95)', 
+          backdropFilter: 'blur(15px)',
           display: 'flex', 
           justifyContent: 'center', 
           alignItems: 'center', 
-          zIndex: 2000 
+          zIndex: 3000,
+          padding: '20px'
         }}>
-          <div className="glass" style={{ padding: '30px', width: '90%', maxWidth: '400px' }}>
-            <h3 style={{ marginBottom: '20px' }}>Order {listing.name}</h3>
+          <div className="card animate-fade-in" style={{ width: '100%', maxWidth: '450px', border: '1px solid var(--accent-primary)', padding: '40px' }}>
+            <h2 style={{ marginBottom: '10px', fontSize: '2.5rem', fontWeight: '900' }}>PURCHASE</h2>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '30px' }}>{listing.name}</p>
             
-            <div style={{ marginBottom: '15px' }}>
-              <label style={{ display: 'block', marginBottom: '5px' }}>Quantity (Max {listing.quantity})</label>
-              <input 
-                type="number" 
-                className="input-field" 
-                min="1" 
-                max={listing.quantity} 
-                value={quantity} 
-                onChange={(e) => setQuantity(parseInt(e.target.value))} 
-              />
+            <div style={{ marginBottom: '40px', textAlign: 'center' }}>
+              <label style={{ display: 'block', marginBottom: '20px', color: 'var(--text-secondary)', textTransform: 'uppercase', fontSize: '0.75rem', fontWeight: '900', letterSpacing: '0.1em' }}>SELECT QUANTITY</label>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '40px' }}>
+                <button 
+                  onClick={() => adjustQuantity(-1)}
+                  style={{ 
+                    width: '64px', 
+                    height: '64px', 
+                    borderRadius: '50%', 
+                    background: 'transparent', 
+                    border: '2px solid var(--accent-primary)', 
+                    color: 'var(--accent-primary)', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    transition: 'var(--transition-smooth)',
+                    fontSize: '2.5rem',
+                    fontWeight: '300',
+                    lineHeight: '0'
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.background = 'rgba(212, 255, 0, 0.1)'}
+                  onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
+                >
+                  <span style={{ marginTop: '-4px' }}>−</span>
+                </button>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <span style={{ fontSize: '4.5rem', fontWeight: '900', color: 'white', lineHeight: '1' }}>{quantity}</span>
+                  <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: '700' }}>UNITS</span>
+                </div>
+                <button 
+                  onClick={() => adjustQuantity(1)}
+                  style={{ 
+                    width: '64px', 
+                    height: '64px', 
+                    borderRadius: '50%', 
+                    background: 'var(--accent-primary)', 
+                    border: '2px solid var(--accent-primary)', 
+                    color: '#000', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    transition: 'var(--transition-smooth)',
+                    boxShadow: '0 0 20px rgba(212, 255, 0, 0.2)',
+                    fontSize: '2.5rem',
+                    fontWeight: '300',
+                    lineHeight: '0'
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                  onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                >
+                  <span style={{ marginTop: '-4px' }}>+</span>
+                </button>
+              </div>
             </div>
 
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', marginBottom: '5px' }}>Add a Note (Optional)</label>
+            <div style={{ marginBottom: '35px' }}>
               <textarea 
                 className="input-field" 
                 rows="3" 
                 value={note} 
                 onChange={(e) => setNote(e.target.value)} 
-                placeholder="E.g. Extra spicy, or when to meet..."
+                placeholder="Add a delivery note (e.g. meet in lobby)"
+                style={{ background: 'var(--surface-color)' }}
               />
             </div>
 
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <button 
-                onClick={() => setShowBuyModal(false)} 
-                style={{ flex: 1, background: 'rgba(255,255,255,0.1)', color: 'white' }}
-              >
-                Cancel
-              </button>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
               <button 
                 className="btn-primary" 
-                style={{ flex: 2 }} 
+                style={{ width: '100%', height: '60px', fontSize: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }} 
                 onClick={handleBuy}
-                disabled={buying}
+                disabled={isProcessing}
               >
-                {buying ? 'Processing...' : `Confirm - $${(listing.price * quantity).toFixed(2)}`}
+                {isProcessing ? (
+                  <>
+                    <Loader2 className="animate-spin" size={24} />
+                    PROCESSING...
+                  </>
+                ) : (
+                  `CONFIRM ₹${(listing.price * quantity)}`
+                )}
+              </button>
+              <button 
+                onClick={() => setShowBuyModal(false)} 
+                style={{ background: 'transparent', color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: '700' }}
+                disabled={isProcessing}
+              >
+                CANCEL ORDER
               </button>
             </div>
           </div>

@@ -18,7 +18,7 @@ export const AuthProvider = ({ children }) => {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const signup = async (email, password, name, roomNumber) => {
+  const signup = async (email, password, name, usn) => {
     const res = await createUserWithEmailAndPassword(auth, email, password);
     const user = res.user;
     
@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }) => {
       uid: user.uid,
       email,
       name,
-      roomNumber,
+      usn,
       createdAt: new Date().toISOString()
     });
 

@@ -50,14 +50,14 @@ const Signup = () => {
             />
           </div>
           <div style={{ marginBottom: '15px' }}>
-            <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem' }}>Room Number</label>
+            <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem' }}>USN (University Seat No.)</label>
             <input 
               type="text" 
               className="input-field" 
-              value={roomNumber} 
-              onChange={(e) => setRoomNumber(e.target.value)} 
+              value={usn} 
+              onChange={(e) => setUsn(e.target.value.toUpperCase())} 
               required 
-              placeholder="B-402"
+              placeholder="1RUA..."
             />
           </div>
           <div style={{ marginBottom: '15px' }}>
