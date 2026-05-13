@@ -1,5 +1,5 @@
 import React from 'react';
-import { Mail, Phone, Instagram, Globe } from 'lucide-react';
+import { Mail, Phone } from 'lucide-react';
 
 const Footer = () => {
   return (
