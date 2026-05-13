@@ -20,7 +20,7 @@ const Footer = () => {
           <div>
             <h2 style={{ fontSize: '2rem', fontWeight: '900', color: 'var(--accent-primary)', marginBottom: '20px' }}>MNC.</h2>
             <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6', fontSize: '0.95rem' }}>
-              The official midnight marketplace for campus students. Fast, secure, and student-run.
+              The official marketplace for campus students. Fast, secure, and student-run.
             </p>
           </div>
 
@@ -60,7 +60,7 @@ const Footer = () => {
           fontSize: '0.8rem',
           fontWeight: '600'
         }}>
-          <p>© 2024 MIDNIGHT CRAVINGS. ALL RIGHTS RESERVED.</p>
+          <p>© 2026 MNC. ALL RIGHTS RESERVED.</p>
           <div style={{ display: 'flex', gap: '20px' }}>
             <span>PRIVACY POLICY</span>
             <span>TERMS OF SERVICE</span>
