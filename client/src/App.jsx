@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
@@ -19,7 +20,7 @@ function App() {
     <AuthProvider>
       <Router>
         <Navbar />
-        <main className="container">
+        <main style={{ minHeight: '80vh' }}>
           <Routes>
             <Route path="/" element={<PrivateRoute><Home /></PrivateRoute>} />
             <Route path="/login" element={<Login />} />
@@ -29,6 +30,7 @@ function App() {
             <Route path="/order/:orderId" element={<PrivateRoute><OrderDetails /></PrivateRoute>} />
           </Routes>
         </main>
+        <Footer />
       </Router>
     </AuthProvider>
   );
