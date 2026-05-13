@@ -95,8 +95,12 @@ const Home = () => {
               <Bell size={18} fill="#000" /> {announcement}
               <Bell size={18} fill="#000" /> {announcement}
               <Bell size={18} fill="#000" /> {announcement}
+              <Bell size={18} fill="#000" /> {announcement}
+              <Bell size={18} fill="#000" /> {announcement}
             </div>
             <div className="marquee-track" style={{ display: 'flex', alignItems: 'center', gap: '50px', paddingRight: '50px' }}>
+              <Bell size={18} fill="#000" /> {announcement}
+              <Bell size={18} fill="#000" /> {announcement}
               <Bell size={18} fill="#000" /> {announcement}
               <Bell size={18} fill="#000" /> {announcement}
               <Bell size={18} fill="#000" /> {announcement}
@@ -105,7 +109,7 @@ const Home = () => {
           </div>
           <style>{`
             .marquee-content {
-              animation: marquee-scroll 30s linear infinite;
+              animation: marquee-scroll 15s linear infinite;
             }
             .marquee-track {
               flex-shrink: 0;
