@@ -85,8 +85,8 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <GlobalMarquee />
         <Navbar />
+        <GlobalMarquee />
         <main className="container" style={{ minHeight: '80vh' }}>
           <Routes>
             <Route path="/" element={<PrivateRoute><Home /></PrivateRoute>} />
