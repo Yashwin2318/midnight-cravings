@@ -139,7 +139,14 @@ const Home = () => {
           </span>
         </div>
 
-        <h1 style={{ fontSize: '6rem', fontWeight: '900', lineHeight: '0.9', marginBottom: '30px', letterSpacing: '-0.05em' }}>
+        <h1 style={{ 
+          fontSize: 'clamp(3.5rem, 8vw, 6rem)', 
+          fontWeight: '900', 
+          lineHeight: '0.9', 
+          marginBottom: '30px', 
+          letterSpacing: '-0.05em',
+          wordBreak: 'break-word'
+        }}>
           YOUR CAMPUS, <br />
           <span style={{ color: 'var(--accent-primary)' }}>YOUR STORE.</span>
         </h1>
