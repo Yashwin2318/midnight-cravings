@@ -7,6 +7,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+app.get("/", (req, res) => {
+  res.send("Backend is running successfully");
+});
+
 // Initialize Firebase Admin
 // You will need to provide the service account key via environment variable or a file
 if (process.env.FIREBASE_SERVICE_ACCOUNT) {
@@ -46,9 +50,9 @@ app.post('/api/orders/:orderId/confirm', authenticate, async (req, res) => {
   try {
     const orderRef = db.collection('orders').doc(orderId);
     const orderDoc = await orderRef.get();
-    
+
     if (!orderDoc.exists) return res.status(404).send('Order not found');
-    
+
     const orderData = orderDoc.data();
     if (orderData.sellerId !== req.user.uid) {
       return res.status(403).send('Only the seller can confirm the order');
