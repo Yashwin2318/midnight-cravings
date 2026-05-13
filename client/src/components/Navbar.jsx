@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { LogOut, PlusSquare, User } from 'lucide-react';
-import logo from '../assets/logo.png'; // Make sure to save the image as logo.png in assets
+import logo from '../assets/logo.png';
 
 const Navbar = () => {
   const { currentUser, userData, logout } = useAuth();
@@ -54,14 +54,13 @@ const Navbar = () => {
                 <User size={18} style={{ color: 'var(--accent-primary)' }} />
                 {userData?.name?.toUpperCase() || 'DASHBOARD'}
               </Link>
-              <button onClick={handleLogout} style={{ background: 'transparent', color: 'var(--text-secondary)', padding: '5px' }}>
+              <button onClick={handleLogout} style={{ background: 'transparent', color: 'var(--text-secondary)', padding: '5px', cursor: 'pointer' }}>
                 <LogOut size={20} />
               </button>
             </>
           ) : (
             <>
-              <Link to="/login" style={{ color: 'white', textDecoration: 'none', fontWeight: '800', fontSize: '0.85rem' }}>LOGIN</Link>
-              <Link to="/signup" className="btn-primary" style={{ textDecoration: 'none', height: '45px', display: 'flex', alignItems: 'center', padding: '0 25px' }}>JOIN NETWORK</Link>
+              {/* Login and Join links removed as requested */}
             </>
           )}
         </div>

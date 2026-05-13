@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { UserPlus, User, Mail, Lock, GraduationCap } from 'lucide-react';
+import { UserPlus, User, Mail, Lock } from 'lucide-react';
 
 const Signup = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
-  const [usn, setUsn] = useState('1RUA');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { signup } = useAuth();
@@ -18,7 +17,8 @@ const Signup = () => {
     try {
       setError('');
       setLoading(true);
-      await signup(email, password, name, usn);
+      // We pass null for USN since we are removing it
+      await signup(email, password, name, '');
       navigate('/');
     } catch (err) {
       setError('Failed to create an account: ' + err.message);
@@ -43,8 +43,8 @@ const Signup = () => {
           }}>
             <UserPlus size={40} style={{ color: 'var(--accent-primary)' }} />
           </div>
-          <h2 style={{ fontSize: '2.5rem', fontWeight: '900', letterSpacing: '-0.05em' }}>JOIN THE NETWORK</h2>
-          <p style={{ color: 'var(--text-secondary)', fontWeight: '500' }}>Campus commerce, redefined.</p>
+          <h2 style={{ fontSize: '2.5rem', fontWeight: '900', letterSpacing: '-0.05em' }}>GET STARTED</h2>
+          <p style={{ color: 'var(--text-secondary)', fontWeight: '500' }}>Your campus marketplace awaits.</p>
         </div>
 
         {error && (
@@ -80,23 +80,7 @@ const Signup = () => {
           </div>
 
           <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase' }}>USN (University Seat No.)</label>
-            <div style={{ position: 'relative' }}>
-              <GraduationCap size={18} style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
-              <input 
-                type="text" 
-                className="input-field" 
-                style={{ paddingLeft: '45px' }}
-                value={usn} 
-                onChange={(e) => setUsn(e.target.value.toUpperCase())} 
-                required 
-                placeholder="1RUA..."
-              />
-            </div>
-          </div>
-
-          <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase' }}>College Email</label>
+            <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase' }}>Mail</label>
             <div style={{ position: 'relative' }}>
               <Mail size={18} style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
               <input 
@@ -106,7 +90,7 @@ const Signup = () => {
                 value={email} 
                 onChange={(e) => setEmail(e.target.value)} 
                 required 
-                placeholder="name@college.edu"
+                placeholder="name@email.com"
               />
             </div>
           </div>
